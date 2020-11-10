@@ -1,1 +1,1 @@
-FROM rhel7-minimal / rhel7-atomic 
+FROM rhel7/rhel
