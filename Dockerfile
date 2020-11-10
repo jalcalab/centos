@@ -1,1 +1,1 @@
-FROM rhel7/rhel
+FROM redhatworkshops/welcome-php
