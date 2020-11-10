@@ -1,26 +1,18 @@
-FROM registry.stage.redhat.io/ubi8/ubi:8.3
+FROM registry.redhat.io/ubi7/ubi-minimal
 
-LABEL com.redhat.component="support-tools-container"
-LABEL name="rhel8/support-tools"
-LABEL version="8.3"
-LABEL maintainer="Red Hat, Inc."
-LABEL usage="podman container runlabel RUN rhel8/support-tools"
+RUN microdnf -y install --nodocs \
+  httpd24 rh-php72 rh-php72-php \
+  && microdnf clean all
 
-LABEL run="podman run -it --name NAME --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=NAME -e IMAGE=IMAGE -v /run:/run -v /var/log:/var/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /:/host IMAGE"
+ADD index.php /opt/rh/httpd24/root/var/www/html
 
-#labels for container catalog
-LABEL summary="A set of tools to analyze the host system."
-LABEL description="The Red Hat Enterprise Linux Support Tools image contains tools to analyze the host system including sosreport and sos-collector"
-LABEL io.k8s.description="The Red Hat Enterprise Linux Support Tools image contains tools to analyze the host system including sosreport and sos-collector"
-LABEL io.k8s.display-name="Red Hat Enterprise Linux Support Tools"
-LABEL io.openshift.tags="sosreport, support"
-LABEL io.openshift.expose-services=""
+RUN sed -i 's/Listen 80/Listen 8080/' \
+  /opt/rh/httpd24/root/etc/httpd/conf/httpd.conf \
+  && chgrp -R 0 /var/log/httpd24 /opt/rh/httpd24/root/var/run/httpd \
+  && chmod -R g=u /var/log/httpd24 /opt/rh/httpd24/root/var/run/httpd
 
+EXPOSE 8080
 
-RUN INSTALL_PKGS="sos sos-collector redhat-support-tool vim-minimal tcpdump mtr strace telnet" && \
-    yum -y install $INSTALL_PKGS && \
-    rpm -V --nosize --nofiledigest --nomtime $INSTALL_PKGS && \
-    yum clean all && \
-    rm -rf /usr/local/man
+USER 1001
 
-CMD ["/usr/bin/bash"]
+CMD scl enable httpd24 rh-php72 -- httpd -D FOREGROUND
