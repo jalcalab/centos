@@ -1,1 +1,1 @@
-FROM registry.access.redhat.com/ubi8/ubi:8.1
+FROM rhel7-minimal / rhel7-atomic 
