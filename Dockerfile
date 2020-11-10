@@ -1,1 +1,1 @@
-FROM redhatworkshops/welcome-php
+FROM registry.access.redhat.com/ubi7/ubi
